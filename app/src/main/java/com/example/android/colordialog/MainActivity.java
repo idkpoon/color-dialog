@@ -1,15 +1,25 @@
 package com.example.android.colordialog;
 
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.LayerDrawable;
+import android.graphics.drawable.VectorDrawable;
 import android.media.Image;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,14 +38,17 @@ import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener,
-        com.example.android.colordialog.dialog.ColorDialog.OnColorSelectedListener{
+        ColorDialog.OnColorSelectedListener, DialogClosed{
 
     public static final String COLOR_PREFERENCES = "ColorPreferences";
 
     Button btnOpenDialog;
-    ImageView imageView;
+    public ImageView imageView;
     private int newColor;
-    private int newColor1;
+    View rootView;
+    GridLayout colorView;
+    ColorDialog colorDialog;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +65,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         else{
             Toast.makeText(this, "The drawable is different", Toast.LENGTH_SHORT).show();
         }
+        ColorDialog.setOnDialogClosedListener(this);
+
+
     }
 
 
@@ -60,17 +76,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (v.getId()){
             case R.id.btnOpenDialog:
                 openDialog();
+
                 break;
         }
     }
 
-    private void openDialog(){
-        ColorDialog dialog = new ColorDialog.Builder(this)
+
+
+    public void openDialog(){
+        colorDialog = new ColorDialog.Builder(this)
                 .setColorChoices(R.array.color_choices)
                 .setNumColumns(5)
                 .setColorShape(ColorShape.CIRCLE)
                 .setTag("MainActivityColor")
                 .show();
+
+        rootView = getLayoutInflater().inflate(R.layout.dialog_colors,null);
+        colorView = rootView.findViewById(R.id.color_grid);
+        colorDialog.repopulateItems();
 
 
     }
@@ -78,59 +101,55 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onColorSelected(int newColor, String tag) {
         btnOpenDialog.setTextColor(newColor);
-        colorSelected(newColor);
+
         SharedPreferences sharedPreferences = getSharedPreferences(COLOR_PREFERENCES, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt("selectedColor", newColor);
         editor.commit();
 
+        colorDialog.repopulateItems();
+
 
     }
 
-    private void colorSelected(int newColor){
 
-        String hexColor = String.format("#%06X", (0xFFFFFF & newColor));
-        Log.v("MainActivity", "Current colour " + hexColor + "   " + String.valueOf(newColor));
+    public void makeNewDrawable(int color, ColorShape shape){
+        Resources res = getResources();
 
-        View rootView = getLayoutInflater().inflate(R.layout.dialog_colors, null);
-        GridLayout colorGrid = rootView.findViewById(R.id.color_grid);
-        colorGrid.setColumnCount(5);
+        Drawable currentDrawable = imageView.getDrawable();
 
-        List colorHexes = Arrays.asList(getResources().getStringArray(R.array.color_choices));
-
-        ArrayList<Integer> colorIntList = new ArrayList<>();
-
-        for (int i = 0; i < colorHexes.size(); i++) {
-            String string = String.valueOf(colorHexes.get(i));
-            int color = Integer.parseInt(string.replaceFirst("^#",""), 16);
-            colorIntList.add(color);
-            Log.v(getClass().getSimpleName(), "Color: " + colorHexes.get(i) + "    " + colorIntList.get(i));
+        GradientDrawable colorChoiceDrawable;
+        if (currentDrawable instanceof GradientDrawable) {
+            // Reuse drawable
+            colorChoiceDrawable = (GradientDrawable) currentDrawable;
+        } else {
+            colorChoiceDrawable = new GradientDrawable();
+            colorChoiceDrawable.setShape(shape == ColorShape.SQUARE ? GradientDrawable.RECTANGLE : GradientDrawable.OVAL);
         }
 
-        int colorInt = 0;
+        // Set stroke to dark version of color
+        int darkenedColor = Color.rgb(
+                Color.red(color) * 192 / 256,
+                Color.green(color) * 192 / 256,
+                Color.blue(color) * 192 / 256);
 
-        for(Object colour : colorHexes) {
-            String currentColour = String.valueOf(colour);
-            if (currentColour.equalsIgnoreCase(hexColor)) {
-                colorInt = colorIntList.get(colorHexes.indexOf(colour));
-                int size = colorGrid.getChildCount();
-                ImageView view = (ImageView) colorGrid.getChildAt(colorHexes.indexOf(colour));
-                Drawable drawable = ColorUtils.makeDrawable(view, colorInt, this, ColorShape.CIRCLE);
-                imageView.setImageDrawable(drawable);
-                view.setImageDrawable(drawable);
+        colorChoiceDrawable.setColor(color);
+        colorChoiceDrawable.setStroke((int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, 2, res.getDisplayMetrics()), darkenedColor);
 
-                break;
-            }
+        Drawable drawable = colorChoiceDrawable;
 
-        }
+        imageView.setImageDrawable(drawable);
+    }
 
 
+    @Override
+    public void onDialogClosed() {
+        SharedPreferences sharedPreferences = getSharedPreferences(COLOR_PREFERENCES, MODE_PRIVATE);
+        int color = sharedPreferences.getInt("selectedColor", 16777215); // 16777215 = white
 
+        ColorUtils.setColorViewValue(imageView, color, false, ColorShape.CIRCLE, this);
 
-      }
-
-
-
-
+    }
 }
 

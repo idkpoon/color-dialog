@@ -12,6 +12,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.VectorDrawable;
+import android.media.Image;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.ArrayRes;
@@ -25,6 +26,9 @@ import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.example.android.colordialog.DialogClosed;
+import com.example.android.colordialog.MainActivity;
+import com.example.android.colordialog.dialog.ColorShape;
 import com.example.android.colordialog.R;
 
 public class ColorDialog extends DialogFragment implements DialogInterface.OnClickListener{
@@ -34,6 +38,9 @@ public class ColorDialog extends DialogFragment implements DialogInterface.OnCli
     private int[] colorChoices;
     private com.example.android.colordialog.dialog.ColorShape colorShape;
     public static final String COLOR_PREFERENCES = "ColorPreferences";
+    private ImageView imageView;
+    static DialogClosed dialogClosedListener;
+
 
 
     //the color to be checked
@@ -45,7 +52,9 @@ public class ColorDialog extends DialogFragment implements DialogInterface.OnCli
     private static final String SELECTED_COLOR_KEY = "selected_color";
 
     public ColorDialog() {
+
     }
+
 
     public static ColorDialog newInstance(int numColumns, com.example.android.colordialog.dialog.ColorShape colorShape, int[] colorChoices, int selectedColorValue) {
         Bundle args = new Bundle();
@@ -87,6 +96,8 @@ public class ColorDialog extends DialogFragment implements DialogInterface.OnCli
 
     }
 
+
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
@@ -102,7 +113,12 @@ public class ColorDialog extends DialogFragment implements DialogInterface.OnCli
                 .setPositiveButton("OK", this)
                 .setNegativeButton("Cancel", this)
                 .create();
+
+
     }
+
+
+
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private static Bitmap getBitmap(VectorDrawable vectorDrawable) {
@@ -114,7 +130,7 @@ public class ColorDialog extends DialogFragment implements DialogInterface.OnCli
         return bitmap;
     }
 
-    private void repopulateItems() {
+    public void repopulateItems() {
         if (colorSelectedListener == null || colorGrid == null) {
             return;
         }
@@ -194,6 +210,7 @@ public class ColorDialog extends DialogFragment implements DialogInterface.OnCli
         dialog.getWindow().setLayout(width, height);
     }
 
+
     @Override
     @TargetApi(23)
     public void onClick(DialogInterface dialog, int which) {
@@ -205,8 +222,21 @@ public class ColorDialog extends DialogFragment implements DialogInterface.OnCli
             case -1:
                 // Positive
                 Toast.makeText(getContext(), "Positive Button Clicked", Toast.LENGTH_SHORT).show();
+                //positive
+                String COLOR_PREFERENCES = "ColorPreferences";
+
+                dialogClosedListener.onDialogClosed();
+
+
                 break;
         }
+    }
+
+    public static void setOnDialogClosedListener(DialogClosed listener){
+
+        dialogClosedListener = listener;
+
+
     }
 
     public interface OnColorSelectedListener {
@@ -221,6 +251,7 @@ public class ColorDialog extends DialogFragment implements DialogInterface.OnCli
         private Context context;
         private int selectedColor;
         private String tag;
+
 
 
         public <ColorActivityType extends Activity & OnColorSelectedListener> Builder(@NonNull ColorActivityType context) {

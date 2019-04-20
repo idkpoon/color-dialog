@@ -66,34 +66,7 @@ public class ColorUtils {
         imageView.setImageDrawable(drawable);
     }
 
-    public static Drawable makeDrawable(ImageView imageView, int color, Context context, ColorShape shape){
-        Resources res = context.getResources();
 
-
-
-        GradientDrawable colorChoiceDrawable = new GradientDrawable();
-
-        Drawable currentDrawable = imageView.getDrawable();
-        if (currentDrawable instanceof GradientDrawable) {
-            // Reuse drawable
-            colorChoiceDrawable = (GradientDrawable) currentDrawable;
-        } else {
-            colorChoiceDrawable = new GradientDrawable();
-            colorChoiceDrawable.setShape(shape == ColorShape.SQUARE ? GradientDrawable.RECTANGLE : GradientDrawable.OVAL);
-        }
-
-        // Set stroke to dark version of color
-        int darkenedColor = Color.rgb(
-                Color.red(color) * 192 / 256,
-                Color.green(color) * 192 / 256,
-                Color.blue(color) * 192 / 256);
-
-        colorChoiceDrawable.setColor(color);
-        colorChoiceDrawable.setStroke((int) TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP, 2, res.getDisplayMetrics()), darkenedColor);
-
-        return colorChoiceDrawable;
-    }
 
 
 
