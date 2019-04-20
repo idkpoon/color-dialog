@@ -25,7 +25,7 @@ import java.util.Vector;
 public class ColorUtils {
 
 
-    public static void setColorViewValue(ImageView imageView, int color, boolean selected, ColorShape shape, Context context) {
+    public static void setColorViewValue(ImageView imageView, int color, boolean colorSelected, ColorShape shape, Context context) {
         Resources res = imageView.getContext().getResources();
 
         Drawable currentDrawable = imageView.getDrawable();
@@ -50,7 +50,7 @@ public class ColorUtils {
                 TypedValue.COMPLEX_UNIT_DIP, 2, res.getDisplayMetrics()), darkenedColor);
 
         Drawable drawable = colorChoiceDrawable;
-        if (selected) {
+        if (colorSelected) {
             VectorDrawable vectorCheck = (VectorDrawable) res.getDrawable(isColorDark(color)
                     ? R.drawable.ic_check_white
                     : R.drawable.ic_check_black);
