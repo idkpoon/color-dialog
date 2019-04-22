@@ -12,7 +12,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.VectorDrawable;
-import android.media.Image;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.ArrayRes;
@@ -21,18 +20,17 @@ import android.support.annotation.NonNull;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.android.colordialog.DialogClosed;
-import com.example.android.colordialog.MainActivity;
-import com.example.android.colordialog.dialog.ColorShape;
 import com.example.android.colordialog.R;
 
 public class ColorDialog extends DialogFragment implements DialogInterface.OnClickListener{
     private GridLayout colorGrid;
+    private EditText etName;
     private OnColorSelectedListener colorSelectedListener;
     private int numColumns;
     private int[] colorChoices;
@@ -40,6 +38,7 @@ public class ColorDialog extends DialogFragment implements DialogInterface.OnCli
     public static final String COLOR_PREFERENCES = "ColorPreferences";
     private ImageView imageView;
     static DialogClosed dialogClosedListener;
+    private static ColorDialog colorDialog;
 
 
 
@@ -64,6 +63,7 @@ public class ColorDialog extends DialogFragment implements DialogInterface.OnCli
         args.putInt(SELECTED_COLOR_KEY, selectedColorValue);
 
         ColorDialog dialog = new ColorDialog();
+
         dialog.setArguments(args);
         return dialog;
     }
@@ -79,7 +79,7 @@ public class ColorDialog extends DialogFragment implements DialogInterface.OnCli
         selectedColorValue = args.getInt(SELECTED_COLOR_KEY);
     }
 
-    public void setOnColorSelectedListener(OnColorSelectedListener colorSelectedListener) {
+    public void setOnColorSelectedListener(OnColorSelectedListener colorSelectedListener, ColorDialog fragment) {
         this.colorSelectedListener = colorSelectedListener;
         repopulateItems();
     }
@@ -89,7 +89,7 @@ public class ColorDialog extends DialogFragment implements DialogInterface.OnCli
         super.onAttach(context);
 
         if (context instanceof OnColorSelectedListener) {
-            setOnColorSelectedListener((OnColorSelectedListener) context);
+            setOnColorSelectedListener((OnColorSelectedListener) context, new ColorDialog());
         } else {
             repopulateItems();
         }
@@ -105,6 +105,7 @@ public class ColorDialog extends DialogFragment implements DialogInterface.OnCli
 
         colorGrid = rootView.findViewById(R.id.color_grid);
         colorGrid.setColumnCount(numColumns);
+        etName = rootView.findViewById(R.id.editTextName);
         repopulateItems();
 
         return new AlertDialog.Builder(getActivity())
@@ -115,6 +116,11 @@ public class ColorDialog extends DialogFragment implements DialogInterface.OnCli
                 .create();
 
 
+    }
+
+    public String getName(){
+
+        return etName.getText().toString();
     }
 
 
@@ -223,11 +229,7 @@ public class ColorDialog extends DialogFragment implements DialogInterface.OnCli
                 // Positive
                 Toast.makeText(getContext(), "Positive Button Clicked", Toast.LENGTH_SHORT).show();
                 //positive
-                String COLOR_PREFERENCES = "ColorPreferences";
-
-                dialogClosedListener.onDialogClosed();
-
-
+                dialogClosedListener.onDialogClosed(null, "homescreen");
                 break;
         }
     }
@@ -287,7 +289,7 @@ public class ColorDialog extends DialogFragment implements DialogInterface.OnCli
 
         protected ColorDialog build() {
             ColorDialog dialog = ColorDialog.newInstance(numColumns, colorShape, colorChoices, selectedColor);
-            dialog.setOnColorSelectedListener((OnColorSelectedListener) context);
+            dialog.setOnColorSelectedListener((OnColorSelectedListener) context, dialog);
             return dialog;
         }
 

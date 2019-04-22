@@ -18,9 +18,6 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.widget.ImageView;
 import com.example.android.colordialog.R;
-import com.example.android.colordialog.dialog.ColorDialog;
-import com.example.android.colordialog.dialog.ColorShape;
-import java.util.Vector;
 
 public class ColorUtils {
 
@@ -111,8 +108,8 @@ public class ColorUtils {
     public static void showDialog(Context context, ColorDialog.OnColorSelectedListener listener, String tag,
                                   int numColumns, ColorShape colorShape, int[] colorChoices, int selectedColorValue) {
         ColorDialog fragment = ColorDialog.newInstance(numColumns, colorShape, colorChoices, selectedColorValue);
-        fragment.setOnColorSelectedListener(listener);
 
+        fragment.setOnColorSelectedListener(listener, fragment);
         Activity activity = Utils.resolveContext(context);
         if (activity != null) {
             activity.getFragmentManager()
@@ -125,10 +122,11 @@ public class ColorUtils {
     public static void attach(Context context, ColorDialog.OnColorSelectedListener listener, String tag) {
         Activity activity = Utils.resolveContext(context);
         if (activity != null) {
+
             ColorDialog fragment = (ColorDialog) activity.getFragmentManager().findFragmentByTag(tag);
             if (fragment != null) {
                 // re-bind preference to fragment
-                fragment.setOnColorSelectedListener(listener);
+                fragment.setOnColorSelectedListener(listener, fragment);
             }
         }
     }

@@ -1,13 +1,20 @@
 package com.example.android.colordialog.dialog;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.TypedArray;
+import android.nfc.Tag;
 import android.preference.Preference;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 
+import com.example.android.colordialog.DialogClosed;
 import com.example.android.colordialog.R;
+
+import java.util.Random;
 
 
 public class ColorPreference extends Preference implements ColorDialog.OnColorSelectedListener {
@@ -113,3 +120,4 @@ public class ColorPreference extends Preference implements ColorDialog.OnColorSe
         setValue(newColor);
     }
 }
+

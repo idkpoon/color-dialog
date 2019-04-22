@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.example.android.colordialog.dialog.ColorPreference
+        android:key="color_pref"
+        app:colorChoices="@array/color_choices"
+        app:colorShape="circle"
+        android:title="Pick colour"
+        android:defaultValue="#e74c3c"
+        />
+
+</PreferenceScreen>
