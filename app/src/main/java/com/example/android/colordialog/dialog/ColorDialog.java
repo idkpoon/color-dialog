@@ -26,7 +26,6 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.android.colordialog.DialogClosed;
-import com.example.android.colordialog.OnColorDialogListener;
 import com.example.android.colordialog.R;
 
 public class ColorDialog extends DialogFragment implements DialogInterface.OnClickListener{
@@ -35,12 +34,11 @@ public class ColorDialog extends DialogFragment implements DialogInterface.OnCli
     private OnColorSelectedListener colorSelectedListener;
     private int numColumns;
     private int[] colorChoices;
-    private com.example.android.colordialog.dialog.ColorShape colorShape;
+    private ColorShape colorShape;
     public static final String COLOR_PREFERENCES = "ColorPreferences";
     private ImageView imageView;
     static DialogClosed dialogClosedListener;
     private static ColorDialog colorDialog;
-    private static OnColorDialogListener onColorDialogListener;
 
 
 
@@ -67,7 +65,6 @@ public class ColorDialog extends DialogFragment implements DialogInterface.OnCli
         colorDialog = new ColorDialog();
 
         colorDialog.setArguments(args);
-        onColorDialogListener.setColorDialog(colorDialog);
 
         return colorDialog;
     }
@@ -98,11 +95,6 @@ public class ColorDialog extends DialogFragment implements DialogInterface.OnCli
         } else {
             repopulateItems();
         }
-
-    }
-
-    public static void setOnColorDialogListener(OnColorDialogListener listener){
-        onColorDialogListener = listener;
 
     }
 
@@ -238,8 +230,7 @@ public class ColorDialog extends DialogFragment implements DialogInterface.OnCli
             case -1:
                 // Positive
                 Toast.makeText(getContext(), "Positive Button Clicked", Toast.LENGTH_SHORT).show();
-                //positive
-//                dialogClosedListener.onDialogClosed(colorDialog, "homescreen");
+                dialogClosedListener.onDialogClosed(colorDialog, "homescreen");
                 break;
         }
     }

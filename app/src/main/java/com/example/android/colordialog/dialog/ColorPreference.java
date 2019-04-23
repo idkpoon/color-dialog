@@ -1,27 +1,19 @@
 package com.example.android.colordialog.dialog;
 
-import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.res.TypedArray;
-import android.nfc.Tag;
-import android.preference.DialogPreference;
 import android.preference.Preference;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Toast;
 
-import com.example.android.colordialog.DialogClosed;
-import com.example.android.colordialog.OnColorDialogListener;
 import com.example.android.colordialog.R;
+import com.example.android.colordialog.dialog.ColorDialog;
+import com.example.android.colordialog.dialog.ColorShape;
+import com.example.android.colordialog.dialog.ColorUtils;
+import com.example.android.colordialog.dialog.PreviewSize;
 
-import java.util.Random;
-
-
-public class ColorPreference extends Preference implements ColorDialog.OnColorSelectedListener, OnColorDialogListener {
+public class ColorPreference extends Preference implements ColorDialog.OnColorSelectedListener {
     private int[] colorChoices = {};
     private int value = 0;
     private int itemLayoutId = R.layout.pref_color_layout;
@@ -29,28 +21,20 @@ public class ColorPreference extends Preference implements ColorDialog.OnColorSe
     private int numColumns = 5;
     private ColorShape colorShape = ColorShape.CIRCLE;
     private boolean showDialog = true;
-    private ColorDialog colorDialog;
 
-    @TargetApi(21)
     public ColorPreference(Context context) {
         super(context);
         initAttrs(null, 0);
-        setOnColorDialogListener();
-
     }
 
     public ColorPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
         initAttrs(attrs, 0);
-        setOnColorDialogListener();
-
     }
 
     public ColorPreference(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         initAttrs(attrs, defStyle);
-        setOnColorDialogListener();
-
     }
 
     private void initAttrs(AttributeSet attrs, int defStyle) {
@@ -72,10 +56,6 @@ public class ColorPreference extends Preference implements ColorDialog.OnColorSe
         }
 
         setWidgetLayoutResource(previewSize == PreviewSize.NORMAL ? itemLayoutId : itemLayoutLargeId);
-    }
-
-    private void setOnColorDialogListener(){
-        ColorDialog.setOnColorDialogListener(this);
     }
 
     @Override
@@ -101,11 +81,6 @@ public class ColorPreference extends Preference implements ColorDialog.OnColorSe
         if (showDialog) {
             ColorUtils.showDialog(getContext(), this, getFragmentTag(),
                     numColumns, colorShape, colorChoices, getValue());
-            Toast.makeText(getContext(), "Clicked", Toast.LENGTH_SHORT).show();
-            setOnColorDialogListener();
-            colorDialog.repopulateItems();
-            Log.v(getFragmentTag(), "Frag tag: " + getFragmentTag());
-
         }
     }
 
@@ -140,11 +115,4 @@ public class ColorPreference extends Preference implements ColorDialog.OnColorSe
     public void onColorSelected(int newColor, String tag) {
         setValue(newColor);
     }
-
-    @Override
-    public void setColorDialog(ColorDialog dialog) {
-        colorDialog = dialog;
-
-    }
 }
-

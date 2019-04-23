@@ -21,6 +21,7 @@ import com.example.android.colordialog.dialog.ColorShape;
 public class SettingsActivity extends AppCompatPreferenceActivity implements ColorDialog.OnColorSelectedListener{
 
     private static Context context;
+    public static final String COLOR_PREFERENCES = "ColorPreferences";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,11 +31,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity implements Col
         SettingsActivity.context = this;
 
         getFragmentManager().beginTransaction().replace(R.id.content_frame, new SettingsFragment()).commit();
-
-    }
-
-    @Override
-    public void onColorSelected(int newColor, String tag) {
 
     }
 
@@ -57,6 +53,11 @@ public class SettingsActivity extends AppCompatPreferenceActivity implements Col
 
 
         }
+    }
+
+    @Override
+    public void onColorSelected(int newColor, String tag) {
+        SharedPreferences sharedPreferences = getSharedPreferences(COLOR_PREFERENCES,MODE_PRIVATE);
     }
 
 }

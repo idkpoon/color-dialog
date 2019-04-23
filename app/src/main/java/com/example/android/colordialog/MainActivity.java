@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -27,6 +28,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.GridLayout;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.colordialog.dialog.ColorDialog;
@@ -42,8 +44,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public static final String COLOR_PREFERENCES = "ColorPreferences";
 
-    Button btnOpenDialog;
+    Button btnOpenDialog, btnSettings;
     public ImageView imageView;
+    TextView tvName;
     private int newColor;
     View rootView;
     GridLayout colorView;
@@ -56,15 +59,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         btnOpenDialog = findViewById(R.id.btnOpenDialog);
+        btnSettings = findViewById(R.id.btnSettings);
+        tvName = findViewById(R.id.tv_name);
+
+
         btnOpenDialog.setOnClickListener(this);
 
         imageView = findViewById(R.id.image);
+
         if(imageView.getDrawable().getConstantState().equals(getResources().getDrawable(R.drawable.ic_check_black).getConstantState())){
             Toast.makeText(this, "The drawable is the same", Toast.LENGTH_SHORT).show();
         }
         else{
             Toast.makeText(this, "The drawable is different", Toast.LENGTH_SHORT).show();
         }
+
+        btnSettings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(MainActivity.this, SettingsActivity.class);
+                startActivity(i);
+            }
+        });
         ColorDialog.setOnDialogClosedListener(this);
 
 
@@ -113,44 +129,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-    public void makeNewDrawable(int color, ColorShape shape){
-        Resources res = getResources();
-
-        Drawable currentDrawable = imageView.getDrawable();
-
-        GradientDrawable colorChoiceDrawable;
-        if (currentDrawable instanceof GradientDrawable) {
-            // Reuse drawable
-            colorChoiceDrawable = (GradientDrawable) currentDrawable;
-        } else {
-            colorChoiceDrawable = new GradientDrawable();
-            colorChoiceDrawable.setShape(shape == ColorShape.SQUARE ? GradientDrawable.RECTANGLE : GradientDrawable.OVAL);
-        }
-
-        // Set stroke to dark version of color
-        int darkenedColor = Color.rgb(
-                Color.red(color) * 192 / 256,
-                Color.green(color) * 192 / 256,
-                Color.blue(color) * 192 / 256);
-
-        colorChoiceDrawable.setColor(color);
-        colorChoiceDrawable.setStroke((int) TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP, 2, res.getDisplayMetrics()), darkenedColor);
-
-        Drawable drawable = colorChoiceDrawable;
-
-        imageView.setImageDrawable(drawable);
-    }
-
-
     @Override
     public void onDialogClosed(ColorDialog colorDialog, String TAG) {
         SharedPreferences sharedPreferences = getSharedPreferences(COLOR_PREFERENCES, MODE_PRIVATE);
-        int color = sharedPreferences.getInt("selectedColor", 16777215); // 16777215 = white
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Log.v(getClass().getSimpleName(), "Name: " + colorDialog.getName());
+        editor.putString("Name", colorDialog.getName());
+        editor.commit();
+
+        String name = sharedPreferences.getString("Name", "No name given");
+
+        int color = sharedPreferences.getInt("selectedColor", 16777215);
 
         ColorUtils.setColorViewValue(imageView, color, false, ColorShape.CIRCLE, this);
-
-        Toast.makeText(this, "Hello", Toast.LENGTH_SHORT).show();
+        tvName.setText(name);
     }
 }
 
