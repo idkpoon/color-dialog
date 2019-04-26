@@ -4,17 +4,20 @@ import android.annotation.TargetApi;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 import android.provider.Settings;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.example.android.colordialog.dialog.ColorDialog;
 import com.example.android.colordialog.dialog.ColorPreference;
@@ -46,11 +49,12 @@ public class SettingsActivity extends AppCompatPreferenceActivity implements Col
         return context;
     }
 
-    public static class SettingsFragment extends PreferenceFragment{
+    public static class SettingsFragment extends PreferenceFragment {
 
         ColorPreference color_pref;
         SharedPreferences sharedPreferences;
         private static ColorDialog colorDialog;
+
 
 
         @Override
@@ -62,17 +66,23 @@ public class SettingsActivity extends AppCompatPreferenceActivity implements Col
             color_pref = (ColorPreference) preferenceScreen.findPreference("color_pref");
             colorDialog = ColorDialog.getColorDialog();
 
+
+
         }
 
     }
 
-
     @TargetApi(23)
     public void onDialogClosed(ColorDialog colorDialog, String TAG) {
-        Toast.makeText(this, "Hello idk", Toast.LENGTH_SHORT).show();
-        SharedPreferences sharedPreferences = getPreferenceScreen().getSharedPreferences();
+        SharedPreferences sharedPreferences = getSharedPreferences(COLOR_PREFERENCES, MODE_PRIVATE);
         int color = sharedPreferences.getInt("selectedColor", 0);
-        Log.v(TAG, "Color " + String.valueOf(color));
+
+        View rootView = getLayoutInflater().inflate(R.layout.pref_color_layout, null, true);
+        ImageView imageView = (ImageView) rootView.findViewById(R.id.color_view);
+
+        ImageView colorView = ColorPreference.getImageView();
+        ColorPreference.setColorViewValue(colorView, color, false, ColorShape.CIRCLE, this);
+
     }
 
     @Override
@@ -101,6 +111,14 @@ public class SettingsActivity extends AppCompatPreferenceActivity implements Col
 
     }
 
+    public SharedPreferences getMySharedPreferences(){
+        return getSharedPreferences(COLOR_PREFERENCES, MODE_PRIVATE);
+    }
+
+    public static int getSelectedColor(){
+        int color = getMyContext().getSharedPreferences(COLOR_PREFERENCES, MODE_PRIVATE).getInt("selectedColor", 0);
+        return color;
+    }
 
 
 

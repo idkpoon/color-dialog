@@ -24,7 +24,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.example.android.colordialog.DialogClosed;
 import com.example.android.colordialog.R;
@@ -248,11 +247,9 @@ public class ColorDialog extends DialogFragment implements DialogInterface.OnCli
         switch(which){
             case -2:
                 // Negative
-                Toast.makeText(getContext(), "Negative Button Clicked", Toast.LENGTH_SHORT).show();
                 break;
             case -1:
                 // Positive
-                Toast.makeText(getContext(), "Positive Button Clicked", Toast.LENGTH_SHORT).show();
                 dialogClosedListener.onDialogClosed(colorDialog, "homescreen");
                 break;
         }

@@ -1,19 +1,31 @@
 package com.example.android.colordialog.dialog;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.LayerDrawable;
+import android.graphics.drawable.VectorDrawable;
+import android.os.Build;
 import android.preference.Preference;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.example.android.colordialog.R;
-import com.example.android.colordialog.dialog.ColorDialog;
-import com.example.android.colordialog.dialog.ColorShape;
-import com.example.android.colordialog.dialog.ColorUtils;
-import com.example.android.colordialog.dialog.PreviewSize;
+import com.example.android.colordialog.SettingsActivity;
 
 public class ColorPreference extends Preference implements ColorDialog.OnColorSelectedListener {
     private int[] colorChoices = {};
@@ -24,7 +36,9 @@ public class ColorPreference extends Preference implements ColorDialog.OnColorSe
     private ColorShape colorShape = ColorShape.CIRCLE;
     private boolean showDialog = true;
     private static View preferenceView;
+    private SharedPreferences sharedPreferences;
     ColorDialog colorDialog;
+    private static ImageView colorView;
 
     public ColorPreference(Context context) {
         super(context);
@@ -34,11 +48,13 @@ public class ColorPreference extends Preference implements ColorDialog.OnColorSe
     public ColorPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
         initAttrs(attrs, 0);
+
     }
 
     public ColorPreference(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         initAttrs(attrs, defStyle);
+
     }
 
     private void initAttrs(AttributeSet attrs, int defStyle) {
@@ -65,16 +81,86 @@ public class ColorPreference extends Preference implements ColorDialog.OnColorSe
     @Override
     protected void onBindView(View view) {
         super.onBindView(view);
-        ImageView colorView = view.findViewById(R.id.color_view);
-        if (colorView != null) {
-            ColorUtils.setColorViewValue(colorView, value, false, colorShape, getContext());
+        colorView = view.findViewById(R.id.color_view);
+        SharedPreferences sharedPreferences = getSharedPreferences();
+//        int color = sharedPreferences.getInt("selectedColor", 0);
+        int color = SettingsActivity.getSelectedColor();
 
-            SharedPreferences sharedPreferences = getSharedPreferences();
-            int color = sharedPreferences.getInt("selectedColor", 0);
-        }
-        else{
+        if (colorView != null) {
+            setColorViewValue(colorView, color, false, ColorShape.CIRCLE, getContext());
+
+        } else {
             Log.v(getClass().getSimpleName(), "Color view is null");
         }
+    }
+
+    public static ImageView getImageView(){
+        return colorView;
+    }
+
+    public static void setColorViewValue(ImageView imageView, int color, boolean selected, ColorShape shape, Context context) {
+        Resources res = imageView.getContext().getResources();
+        Log.v("ColorPreference", "Colour from colourviewvalue: " + String.valueOf(color));
+//        color = -13304063;
+        Drawable currentDrawable = imageView.getDrawable();
+
+        GradientDrawable colorChoiceDrawable;
+        if (currentDrawable instanceof GradientDrawable) {
+            // Reuse drawable
+            colorChoiceDrawable = (GradientDrawable) currentDrawable;
+        } else {
+            colorChoiceDrawable = new GradientDrawable();
+            colorChoiceDrawable.setShape(shape == ColorShape.SQUARE ? GradientDrawable.RECTANGLE : GradientDrawable.OVAL);
+        }
+
+        // Set stroke to dark version of color
+        int darkenedColor = Color.rgb(
+                Color.red(color) * 192 / 256,
+                Color.green(color) * 192 / 256,
+                Color.blue(color) * 192 / 256);
+
+        String hexColor = String.format("#%06X", (0xFFFFFF & color));
+
+        colorChoiceDrawable.setColor(Color.parseColor(hexColor));
+        colorChoiceDrawable.setStroke((int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, 2, res.getDisplayMetrics()), darkenedColor);
+
+        Drawable drawable = colorChoiceDrawable;
+        if (selected) {
+            VectorDrawable vectorCheck = (VectorDrawable) res.getDrawable(isColorDark(color)
+                    ? R.drawable.ic_check_white
+                    : R.drawable.ic_check_black);
+            Bitmap checkmark = getBitmap(vectorCheck);
+            BitmapDrawable bitmapDrawable = new BitmapDrawable(context.getResources(), checkmark);
+
+            bitmapDrawable.setGravity(Gravity.CENTER);
+            drawable = new LayerDrawable(new Drawable[]{
+                    colorChoiceDrawable,
+                    bitmapDrawable});
+        }
+
+        imageView.setImageDrawable(colorChoiceDrawable);
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private static Bitmap getBitmap(VectorDrawable vectorDrawable) {
+        Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(),
+                vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        vectorDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        vectorDrawable.draw(canvas);
+        return bitmap;
+    }
+
+
+
+
+    private static final int BRIGHTNESS_THRESHOLD = 150;
+
+    private static boolean isColorDark(int color) {
+        return ((30 * Color.red(color) +
+                59 * Color.green(color) +
+                11 * Color.blue(color)) / 100) <= BRIGHTNESS_THRESHOLD;
     }
 
 
@@ -132,7 +218,9 @@ public class ColorPreference extends Preference implements ColorDialog.OnColorSe
 
     @Override
     public void onColorSelected(int newColor, String tag) {
-        setValue(newColor);
+        SharedPreferences sharedPreferences = getSharedPreferences();
+        int color = sharedPreferences.getInt("selectedColor", 0);
+        setValue(color);
 
     }
 }
