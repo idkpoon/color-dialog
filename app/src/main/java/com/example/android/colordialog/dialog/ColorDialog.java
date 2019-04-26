@@ -18,6 +18,7 @@ import android.support.annotation.ArrayRes;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -38,12 +39,9 @@ public class ColorDialog extends DialogFragment implements DialogInterface.OnCli
     public static final String COLOR_PREFERENCES = "ColorPreferences";
     private ImageView imageView;
     static DialogClosed dialogClosedListener;
-    private static ColorDialog colorDialog;
-
-
-
-    //the color to be checked
+    public static ColorDialog colorDialog;
     private int selectedColorValue;
+
 
     private static final String NUM_COLUMNS_KEY = "num_columns";
     private static final String COLOR_SHAPE_KEY = "color_shape";
@@ -84,6 +82,10 @@ public class ColorDialog extends DialogFragment implements DialogInterface.OnCli
     public void setOnColorSelectedListener(OnColorSelectedListener colorSelectedListener, ColorDialog fragment) {
         this.colorSelectedListener = colorSelectedListener;
         repopulateItems();
+    }
+
+    public static ColorDialog getColorDialog(){
+        return colorDialog;
     }
 
     @Override
@@ -146,22 +148,43 @@ public class ColorDialog extends DialogFragment implements DialogInterface.OnCli
         Context context = colorGrid.getContext();
         colorGrid.removeAllViews();
 
-        for (final int color : colorChoices) {
+        int[] colorArray = new int[colorChoices.length];
+
+        for(int i = 0; i < colorChoices.length; i++) {
+            String hexColor = String.format("#%06X", (0xFFFFFF & colorChoices[i]));
+            hexColor = hexColor.replace("#", "");
+            int regularColor = Integer.valueOf(hexColor, 16);
+            colorArray[i] = regularColor;
+        }
+
+        for(int i = 0; i < colorArray.length; i++){
+            Log.v(getClass().getSimpleName(), "Color: "+ colorChoices[i] + " (int): " + colorArray[i]);
+        }
+
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(COLOR_PREFERENCES, Context.MODE_PRIVATE);
+        int savedColor = sharedPreferences.getInt("selectedColor", 12597547);
+        Log.v(getClass().getSimpleName(), "Selected Color: " + String.valueOf(savedColor));
+
+
+
+        for (int i = 0; i<colorChoices.length; i++) {
+            final int color = colorArray[i]; // Non negative number
+
             View itemView = LayoutInflater.from(context)
                     .inflate(R.layout.grid_item_color, colorGrid, false);
-
-            SharedPreferences sharedPreferences = getActivity().getSharedPreferences(COLOR_PREFERENCES, Context.MODE_PRIVATE);
-            int savedColor = sharedPreferences.getInt("selectedColor", 0);
             boolean selected = false;
 
             if(color == savedColor){
                 selected = true;
+                Log.v(getClass().getSimpleName(), "Same colour " + String.valueOf(color));
             }
             else{
+                Log.v(getClass().getSimpleName(), "Different colour " + String.valueOf(color));
                 selected = false;
             }
 
-            ColorUtils.setColorViewValue((ImageView) itemView.findViewById(R.id.color_view), color,
+            final int colorInt = colorChoices[i];
+            ColorUtils.setColorViewValue((ImageView) itemView.findViewById(R.id.color_view), colorInt,
                     selected, colorShape, context);
 
 

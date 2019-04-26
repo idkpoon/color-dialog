@@ -1,9 +1,11 @@
 package com.example.android.colordialog.dialog;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.preference.Preference;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -21,6 +23,8 @@ public class ColorPreference extends Preference implements ColorDialog.OnColorSe
     private int numColumns = 5;
     private ColorShape colorShape = ColorShape.CIRCLE;
     private boolean showDialog = true;
+    private static View preferenceView;
+    ColorDialog colorDialog;
 
     public ColorPreference(Context context) {
         super(context);
@@ -64,16 +68,15 @@ public class ColorPreference extends Preference implements ColorDialog.OnColorSe
         ImageView colorView = view.findViewById(R.id.color_view);
         if (colorView != null) {
             ColorUtils.setColorViewValue(colorView, value, false, colorShape, getContext());
+
+            SharedPreferences sharedPreferences = getSharedPreferences();
+            int color = sharedPreferences.getInt("selectedColor", 0);
+        }
+        else{
+            Log.v(getClass().getSimpleName(), "Color view is null");
         }
     }
 
-    public void setValue(int value) {
-        if (callChangeListener(value)) {
-            this.value = value;
-            persistInt(value);
-            notifyChanged();
-        }
-    }
 
     @Override
     protected void onClick() {
@@ -81,8 +84,14 @@ public class ColorPreference extends Preference implements ColorDialog.OnColorSe
         if (showDialog) {
             ColorUtils.showDialog(getContext(), this, getFragmentTag(),
                     numColumns, colorShape, colorChoices, getValue());
+             colorDialog = ColorUtils.getDialog();
+
+
+
         }
     }
+
+
 
     @Override
     protected void onAttachedToActivity() {
@@ -107,6 +116,16 @@ public class ColorPreference extends Preference implements ColorDialog.OnColorSe
         return "color_" + getKey();
     }
 
+
+    public void setValue(int value) {
+        if (callChangeListener(value)) {
+            this.value = value;
+            persistInt(value);
+            notifyChanged();
+
+        }
+    }
+
     public int getValue() {
         return value;
     }
@@ -114,5 +133,6 @@ public class ColorPreference extends Preference implements ColorDialog.OnColorSe
     @Override
     public void onColorSelected(int newColor, String tag) {
         setValue(newColor);
+
     }
 }

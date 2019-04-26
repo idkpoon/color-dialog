@@ -21,6 +21,8 @@ import com.example.android.colordialog.R;
 
 public class ColorUtils {
 
+    private static ColorDialog colorDialog;
+
 
     public static void setColorViewValue(ImageView imageView, int color, boolean selected, ColorShape shape, Context context) {
         Resources res = imageView.getContext().getResources();
@@ -41,6 +43,7 @@ public class ColorUtils {
                 Color.red(color) * 192 / 256,
                 Color.green(color) * 192 / 256,
                 Color.blue(color) * 192 / 256);
+
 
         colorChoiceDrawable.setColor(color);
         colorChoiceDrawable.setStroke((int) TypedValue.applyDimension(
@@ -107,16 +110,19 @@ public class ColorUtils {
 
     public static void showDialog(Context context, ColorDialog.OnColorSelectedListener listener, String tag,
                                   int numColumns, ColorShape colorShape, int[] colorChoices, int selectedColorValue) {
-        ColorDialog fragment = ColorDialog.newInstance(numColumns, colorShape, colorChoices, selectedColorValue);
-
-        fragment.setOnColorSelectedListener(listener, fragment);
+        colorDialog = ColorDialog.newInstance(numColumns, colorShape, colorChoices, selectedColorValue);
+        colorDialog.setOnColorSelectedListener(listener, colorDialog);
         Activity activity = Utils.resolveContext(context);
         if (activity != null) {
             activity.getFragmentManager()
                     .beginTransaction()
-                    .add(fragment, tag)
+                    .add(colorDialog, tag)
                     .commit();
         }
+    }
+
+    public static ColorDialog getDialog(){
+        return colorDialog;
     }
 
     public static void attach(Context context, ColorDialog.OnColorSelectedListener listener, String tag) {
