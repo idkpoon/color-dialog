@@ -27,10 +27,11 @@ import android.widget.ImageView;
 
 import com.example.android.colordialog.DialogClosed;
 import com.example.android.colordialog.R;
+import com.example.android.colordialog.SettingsActivity;
 
 public class ColorDialog extends DialogFragment implements DialogInterface.OnClickListener{
     private GridLayout colorGrid;
-    private EditText etName;
+    private static EditText etName;
     private OnColorSelectedListener colorSelectedListener;
     private int numColumns;
     private int[] colorChoices;
@@ -102,6 +103,7 @@ public class ColorDialog extends DialogFragment implements DialogInterface.OnCli
 
 
     @Override
+    @TargetApi(23)
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
         View rootView = layoutInflater.inflate(R.layout.dialog_colors, null);
@@ -110,6 +112,9 @@ public class ColorDialog extends DialogFragment implements DialogInterface.OnCli
         colorGrid.setColumnCount(numColumns);
         etName = rootView.findViewById(R.id.editTextName);
         repopulateItems();
+        SharedPreferences sharedPreferences = getContext().getSharedPreferences(SettingsActivity.COLOR_PREFERENCES, Context.MODE_PRIVATE);
+
+        etName.setText(sharedPreferences.getString("categoryName", ""));
 
         return new AlertDialog.Builder(getActivity())
                 .setView(rootView)
@@ -121,7 +126,7 @@ public class ColorDialog extends DialogFragment implements DialogInterface.OnCli
 
     }
 
-    public String getName(){
+    public static String getName(){
 
         return etName.getText().toString();
     }

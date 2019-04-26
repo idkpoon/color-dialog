@@ -18,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.example.android.colordialog.dialog.ColorDialog;
 import com.example.android.colordialog.dialog.ColorPreference;
@@ -51,13 +52,14 @@ public class SettingsActivity extends AppCompatPreferenceActivity implements Col
 
     public static class SettingsFragment extends PreferenceFragment {
 
-        ColorPreference color_pref;
+        static ColorPreference color_pref;
         SharedPreferences sharedPreferences;
         private static ColorDialog colorDialog;
 
 
 
         @Override
+        @TargetApi(23)
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.preferences);
@@ -65,15 +67,33 @@ public class SettingsActivity extends AppCompatPreferenceActivity implements Col
             preferenceScreen = getPreferenceScreen();
             color_pref = (ColorPreference) preferenceScreen.findPreference("color_pref");
             colorDialog = ColorDialog.getColorDialog();
+            sharedPreferences = getContext().getSharedPreferences(COLOR_PREFERENCES, MODE_PRIVATE);
+            String value = sharedPreferences.getString("categoryName", "");
+            color_pref.setSummary(value);
 
 
 
+        }
+
+        public static ColorPreference getColorPreference(){
+            return color_pref;
         }
 
     }
 
     @TargetApi(23)
     public void onDialogClosed(ColorDialog colorDialog, String TAG) {
+
+        String value = colorDialog.getName();
+
+        SharedPreferences.Editor editor = getMySharedPreferences().edit();
+        editor.putString("categoryName", value);
+        editor.commit();
+
+        SettingsFragment.getColorPreference().setSummary(value);
+
+
+
         SharedPreferences sharedPreferences = getSharedPreferences(COLOR_PREFERENCES, MODE_PRIVATE);
         int color = sharedPreferences.getInt("selectedColor", 0);
 

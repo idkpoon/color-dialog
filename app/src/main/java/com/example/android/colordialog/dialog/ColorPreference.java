@@ -21,6 +21,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -35,8 +36,6 @@ public class ColorPreference extends Preference implements ColorDialog.OnColorSe
     private int numColumns = 5;
     private ColorShape colorShape = ColorShape.CIRCLE;
     private boolean showDialog = true;
-    private static View preferenceView;
-    private SharedPreferences sharedPreferences;
     ColorDialog colorDialog;
     private static ImageView colorView;
 
@@ -82,6 +81,7 @@ public class ColorPreference extends Preference implements ColorDialog.OnColorSe
     protected void onBindView(View view) {
         super.onBindView(view);
         colorView = view.findViewById(R.id.color_view);
+
         SharedPreferences sharedPreferences = getSharedPreferences();
 //        int color = sharedPreferences.getInt("selectedColor", 0);
         int color = SettingsActivity.getSelectedColor();
